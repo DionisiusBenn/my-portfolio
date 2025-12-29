@@ -1,21 +1,113 @@
 'use client';
 
-
 import Image from 'next/image';
-import { Linkedin, Instagram, ArrowDown, ChevronRight, ArrowRight, Code, Palette, Cpu, Users, Zap, Sparkles } from 'lucide-react';
+import { Linkedin, Instagram, ArrowDown, ArrowRight, ChevronRight } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
+interface Project {
+  id: number;
+  title: string;
+  category: string;
+  description: string;
+  tech: string[];
+  stats: string;
+  color: string;
+  image: string;
+}
+
+interface Service {
+  title: string;
+  projects: string;
+  color: string;
+}
+
+interface OtherProject {
+  id: number;
+  title: string;
+  category: string;
+}
+
 export default function Home() {
-  const aboutRef = useRef<HTMLDivElement>(null);
   const projectsRef = useRef<HTMLDivElement>(null);
   const [scrolled, setScrolled] = useState(false);
-  const [isAboutVisible, setIsAboutVisible] = useState(false);
+  const [isProjectsVisible, setIsProjectsVisible] = useState(false);
   const [titleScale, setTitleScale] = useState(1);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [activeCard, setActiveCard] = useState<number | null>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [activeProject, setActiveProject] = useState<number | null>(null);
 
-  // Mouse move effect for parallax
+  const projects: Project[] = [
+    {
+      id: 1,
+      title: "E-commerce Platform",
+      category: "Web Development",
+      description: "Scalable online shopping solution with real-time inventory management",
+      tech: ["React", "Node.js", "MongoDB", "Stripe"],
+      stats: "↑ 320% Revenue",
+      color: "from-gray-800 to-gray-900",
+      image: "/profile2.png"
+    },
+    {
+      id: 2,
+      title: "Analytics Dashboard",
+      category: "UI/UX Design",
+      description: "Real-time data visualization platform for business intelligence",
+      tech: ["Next.js", "D3.js", "Tailwind", "Firebase"],
+      stats: "↑ 180% Engagement",
+      color: "from-gray-700 to-gray-800",
+      image: "/profile2.png"
+    },
+    {
+      id: 3,
+      title: "Mobile Banking App",
+      category: "Mobile Development",
+      description: "Secure cross-platform banking application with biometric authentication",
+      tech: ["React Native", "Expo", "Firebase", "AWS"],
+      stats: "50K+ Users",
+      color: "from-gray-600 to-gray-700",
+      image: "/profile.jpg"
+    },
+    {
+      id: 4,
+      title: "API Gateway System",
+      category: "Backend Development",
+      description: "Microservices architecture with load balancing and rate limiting",
+      tech: ["Python", "FastAPI", "PostgreSQL", "Redis"],
+      stats: "99.9% Uptime",
+      color: "from-gray-800 to-gray-900",
+      image: "/profile2.png"
+    }
+  ];
+
+  const projectServices: Service[] = [
+    {
+      title: "Web Development",
+      projects: "24 Projects",
+      color: "bg-gradient-to-r from-gray-800 to-gray-900"
+    },
+    {
+      title: "UI/UX Design",
+      projects: "18 Projects",
+      color: "bg-gradient-to-r from-gray-700 to-gray-800"
+    },
+    {
+      title: "3D Blender Design",
+      projects: "12 Projects",
+      color: "bg-gradient-to-r from-gray-600 to-gray-700"
+    },
+    {
+      title: "Backend Systems",
+      projects: "16 Projects",
+      color: "bg-gradient-to-r from-gray-800 to-gray-900"
+    }
+  ];
+
+  const otherProjects: OtherProject[] = [
+    { id: 4, title: "Mobile Banking", category: "App" },
+    { id: 5, title: "Analytics Dashboard", category: "SaaS" },
+    { id: 6, title: "Learning Platform", category: "Web" },
+  ];
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({
@@ -27,7 +119,6 @@ export default function Home() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  // Scroll effect for animations
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -37,24 +128,22 @@ export default function Home() {
       setScrollProgress(currentScrollY / totalHeight);
       setScrolled(currentScrollY > 100);
       
-      // Title scale effect
-      if (aboutRef.current) {
-        const aboutOffset = aboutRef.current.offsetTop;
-        const distanceToAbout = aboutOffset - currentScrollY;
+      if (projectsRef.current) {
+        const projectsOffset = projectsRef.current.offsetTop;
+        const distanceToProjects = projectsOffset - currentScrollY;
         const maxDistance = windowHeight * 0.7;
         
-        if (distanceToAbout < maxDistance && distanceToAbout > -maxDistance) {
-          const progress = 1 - Math.abs(distanceToAbout) / maxDistance;
+        if (distanceToProjects < maxDistance && distanceToProjects > -maxDistance) {
+          const progress = 1 - Math.abs(distanceToProjects) / maxDistance;
           const scale = 1 + (progress * 0.15);
           setTitleScale(scale);
         } else {
           setTitleScale(1);
         }
         
-        // Check if about section is in view
-        const rect = aboutRef.current.getBoundingClientRect();
+        const rect = projectsRef.current.getBoundingClientRect();
         const isVisible = rect.top < windowHeight * 0.8 && rect.bottom > 0;
-        setIsAboutVisible(isVisible);
+        setIsProjectsVisible(isVisible);
       }
     };
     
@@ -63,55 +152,28 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Smooth scroll function
-  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
-    if (ref.current) {
+  const scrollToProjects = () => {
+    if (projectsRef.current) {
       window.scrollTo({
-        top: ref.current.offsetTop - 80,
+        top: projectsRef.current.offsetTop - 80,
         behavior: 'smooth'
       });
     }
   };
 
-  // Services data
-  const services = [
-    {
-      id: 1,
-      icon: Code,
-      title: "About Myself",
-      subtitle: " Know More About Me",
-      items: ["Branding Strategy", "R&D/Lab Innovation", "Business Development", "Investment Strategy"],
-      color: "from-gray-800 to-gray-900"
-    },
-    {
-      id: 2,
-      icon: Palette,
-      title: "Fun Facts",
-      subtitle: "Daily Life",
-      items: ["Consulting & Advisory", "System Development", "Business Intelligence", "System Integration", "UX/UI Design", "Cross-border Solutions"],
-      color: "from-gray-700 to-gray-800"
-    },
-    {
-      id: 3,
-      icon: Users,
-      title: "Hobbies",
-      subtitle: "Creative Productions",
-      items: ["Education Advisory", "In-house Development", "Talent Retention", "Training & Workshops"],
-      color: "from-gray-600 to-gray-700"
-    }
-  ];
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
-  // Skills data
-  const skills = [
-    { name: "Frontend Development", percentage: 87, icon: Code },
-    { name: "Backend Systems", percentage: 70, icon: Cpu },
-    { name: "UI/UX Design", percentage: 95, icon: Palette },
-    { name: "Cloud & DevOps", percentage: 65, icon: Zap }
-  ];
+  const scrollToContact = () => {
+    const contactSection = document.getElementById('contact');
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <>
-      {/* Animated background elements */}
       <div className="fixed inset-0 -z-10 overflow-hidden">
         <div 
           className="absolute inset-0 bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200"
@@ -119,7 +181,6 @@ export default function Home() {
             transform: `translateX(${mousePosition.x * 10}px) translateY(${mousePosition.y * 10}px)`
           }}
         />
-        {/* Grid pattern */}
         <div 
           className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -128,13 +189,11 @@ export default function Home() {
             transform: `translateX(${mousePosition.x * 5}px) translateY(${mousePosition.y * 5}px)`
           }}
         />
-        {/* Floating elements */}
         <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-gradient-to-r from-gray-300/20 to-gray-400/20 blur-3xl animate-float-slow" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-gradient-to-r from-gray-400/10 to-gray-500/10 blur-3xl animate-float" />
       </div>
 
       <main className="min-h-screen relative">
-        {/* Progress bar */}
         <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
           <div 
             className="h-full bg-gradient-to-r from-gray-800 to-gray-900 transition-all duration-300"
@@ -142,24 +201,21 @@ export default function Home() {
           />
         </div>
 
-        {/* Scroll indicator */}
         <div 
           className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-40 transition-all duration-500"
           style={{
-            opacity: isAboutVisible ? 0 : 1,
-            transform: `translate(-50%, ${isAboutVisible ? '100px' : '0'})`
+            opacity: isProjectsVisible ? 0 : 1,
+            transform: `translate(-50%, ${isProjectsVisible ? '100px' : '0'})`
           }}
         >
           <button 
-          
-            onClick={() => scrollToSection(aboutRef)}
+            onClick={scrollToProjects}
             className="group w-12 h-12 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm shadow-lg border border-gray-300 hover:bg-white transition-all duration-300 hover:scale-110 hover:shadow-xl"
           >
             <ArrowDown className="w-5 h-5 text-gray-800 group-hover:translate-y-1 transition-transform" />
           </button>
         </div>
 
-        {/* Decorative elements */}
         <div className="absolute top-20 left-10 animate-pulse-slow">
           <div className="w-2 h-2 bg-gray-400 rounded-full" />
         </div>
@@ -168,15 +224,13 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-4 py-12 md:py-20 pt-24 relative">
-          {/* Top Section - Left and Right Text */}
           <div className="max-w-7xl mx-auto mb-16">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-              {/* Left Side */}
               <div 
-                className="text-gray-700 text-sm md:text-base leading-relaxed font-light transition-all duration-1000"
+                className="text-gray-700 text-sm md:text-base leading-relaxed font-light transition-all duration-1000 mt-4"
                 style={{
-                  opacity: isAboutVisible ? 0.2 : 1,
-                  transform: `translateY(${isAboutVisible ? '-40px' : '0'}) translateX(${mousePosition.x * -10}px)`
+                  opacity: isProjectsVisible ? 0.2 : 1,
+                  transform: `translateY(${isProjectsVisible ? '-40px' : '0'}) translateX(${mousePosition.x * -10}px)`
                 }}
               >
                 <p className="mb-2">I am an Undergraduate student from University of Indonesia</p>
@@ -184,12 +238,11 @@ export default function Home() {
                 <p>Bogor, Indonesia.</p>
               </div>
 
-              {/* Right Side */}
               <div 
-                className="text-gray-700 text-sm md:text-base leading-relaxed text-left md:text-right font-light transition-all duration-1000 delay-200"
+                className="text-gray-700 text-sm md:text-base leading-relaxed text-left md:text-right font-light transition-all duration-1000 delay-200 mt-4"
                 style={{
-                  opacity: isAboutVisible ? 0.2 : 1,
-                  transform: `translateY(${isAboutVisible ? '-40px' : '0'}) translateX(${mousePosition.x * 10}px)`
+                  opacity: isProjectsVisible ? 0.2 : 1,
+                  transform: `translateY(${isProjectsVisible ? '-40px' : '0'}) translateX(${mousePosition.x * 10}px)`
                 }}
               >
                 <p className="mb-2">Open to all forms of design</p>
@@ -199,7 +252,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Main Heading with Enhanced Animations */}
           <div className="max-w-7xl mx-auto mb-12 relative">
             <div 
               className="absolute inset-0 blur-3xl opacity-10 bg-gradient-to-r from-gray-800 to-gray-600 rounded-full"
@@ -217,14 +269,13 @@ export default function Home() {
                 textShadow: `0 10px 30px rgba(0,0,0,0.1)`
               }}
             >
-              {/* Animated background for each word */}
               <span className="relative">
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-200/50 to-transparent animate-shimmer opacity-0" />
                 <span 
                   className="block text-gray-900 transition-all duration-1000"
                   style={{
-                    opacity: isAboutVisible ? 0.3 : 1,
-                    transform: `translateY(${isAboutVisible ? '-50px' : '0'})`
+                    opacity: isProjectsVisible ? 0.3 : 1,
+                    transform: `translateY(${isProjectsVisible ? '-50px' : '0'})`
                   }}
                 >
                   SCALABLE
@@ -236,88 +287,72 @@ export default function Home() {
                 <span 
                   className="text-gray-900 transition-all duration-1000 delay-100"
                   style={{
-                    opacity: isAboutVisible ? 0.3 : 1,
-                    transform: `translateY(${isAboutVisible ? '-50px' : '0'})`
+                    opacity: isProjectsVisible ? 0.3 : 1,
+                    transform: `translateY(${isProjectsVisible ? '-50px' : '0'})`
                   }}
                 >
                   CODE.
                 </span>
               </span>
 
-              <span className="w-full flex justify-left text-12xl md:text-15xl lg:text-9xl mt-8 relative">
+              <span className="w-full flex justify-start text-12xl md:text-15xl lg:text-9xl mt-8 relative">
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-200/30 to-transparent animate-shimmer delay-1000 opacity-0" />
                 <span 
                   className="text-gray-900 transition-all duration-1000 delay-200"
                   style={{
-                    opacity: isAboutVisible ? 0.3 : 1,
-                    transform: `translateY(${isAboutVisible ? '-50px' : '0'})`
+                    opacity: isProjectsVisible ? 0.3 : 1,
+                    transform: `translateY(${isProjectsVisible ? '-50px' : '0'})`
                   }}
                 >
                   HUMAN DESIGN
                 </span>
               </span>
             </h1>
-            {/* ADD THE PICTURE FRAME HERE */}
-<div className="relative mt-10 w-full max-w-sm">
-  <div className="relative rounded-lg overflow-hidden shadow-xl">
-    <div className="relative aspect-[12/8] w-full">
-      <Image
-      src="/profile2.png"
-      alt="Profile picture of Dionisius"
-      fill
-      className="object-cover"
-/>
-    </div>
-  </div>
-</div>
-            {/* Floating icons */}
+            
             <div 
               className="absolute top-1/4 left-1/4 transition-all duration-500"
               style={{
-                opacity: isAboutVisible ? 0 : 1,
+                opacity: isProjectsVisible ? 0 : 1,
                 transform: `translate(${mousePosition.x * 20}px, ${mousePosition.y * 20}px)`
               }}
             >
-              <Code className="w-8 h-8 text-gray-400 animate-float" />
+              <ChevronRight className="w-8 h-8 text-gray-400 animate-float" />
             </div>
           </div>
 
-          {/* Bottom Section - Info and Image */}
-          <div className="max-w-7xl -mt-28">
+          <div className="max-w-7xl -mt-20">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-end">
-              {/* Left - Image with parallax */}
               <div 
                 className="order-2 lg:order-1 transition-all duration-1000"
                 style={{
-                  opacity: isAboutVisible ? 0 : 1,
-                  transform: `translateX(${isAboutVisible ? '-100px' : '0'}) rotate(${isAboutVisible ? '-5deg' : '0deg'})`
+                  opacity: isProjectsVisible ? 0 : 1,
+                  transform: `translateX(${isProjectsVisible ? '-100px' : '0'}) rotate(${isProjectsVisible ? '-5deg' : '0deg'})`
                 }}
               >
                 <div 
-                  className="relative w-full aspect-[5/] max-w-md mx-auto lg:mx-0 rounded-3xl overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-500 group"
+                  className="relative w-full aspect-[5/4] max-w-md mx-auto lg:mx-0 rounded-3xl overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-500 group mt-20"
                   style={{
                     transform: `translate(${mousePosition.x * -10}px, ${mousePosition.y * -10}px)`
                   }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-gray-800/20 to-gray-900/20 z-10" />
                   <Image
-                    src="/profile.jpg"
+                    src="/profile2.png"
                     alt="Profile"
                     fill
                     className="object-cover grayscale hover:grayscale-0 transition-all duration-700 group-hover:scale-110"
                     priority
+                    sizes="(max-width: 768px) 100vw, 50vw"
                   />
-                  {/* Animated border */}
                   <div className="absolute inset-0 rounded-3xl border-2 border-gray-300/30 group-hover:border-gray-400/50 transition-all duration-500" />
                 </div>
               </div>
 
-              {/* Right - Info */}
               <div 
                 className="order-1 lg:order-2 text-right space-y-6 transition-all duration-1000 delay-300 -mt-24"
                 style={{
-                  opacity: isAboutVisible ? 0 : 1,
-                  transform: `translateX(${isAboutVisible ? '100px' : '0'})`
+                  opacity: isProjectsVisible ? 0 : 1,
+                  transform: `translateX(${isProjectsVisible ? '100px' : '0'})`
                 }}
               >
                 <div className="space-y-3 -mt-6">
@@ -332,7 +367,6 @@ export default function Home() {
                   </p>
                 </div>
 
-                {/* Social Links with hover effects */}
                 <div className="flex gap-4 justify-end">
                   <a
                     href="https://www.linkedin.com/in/dionisius-bennett-andrianto-5a2515315/"
@@ -354,7 +388,6 @@ export default function Home() {
                   </a>
                 </div>
 
-                {/* Animated skill indicators */}
                 <div className="flex flex-wrap gap-3 justify-end mt-6">
                   {['React', 'Next.js', 'TypeScript', 'Node.js', 'Tailwind'].map((tech, index) => (
                     <span
@@ -374,233 +407,345 @@ export default function Home() {
         </div>
       </main>
 
-      {/* About Section - Enhanced Monochrome Design */}
-      <div 
-        ref={aboutRef} 
-        className="min-h-screen py-32 relative overflow-hidden"
+      <section 
+        ref={projectsRef} 
+        id="projects" 
+        className="min-h-screen py-32 relative overflow-hidden bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200"
       >
-        {/* Animated background for about section */}
-        <div 
-          className="absolute inset-0 bg-gradient-to-b from-gray-100 via-gray-50 to-gray-200 transition-all duration-1000"
-          style={{
-            opacity: isAboutVisible ? 1 : 0,
-            transform: `translateY(${isAboutVisible ? '0' : '100px'})`
-          }}
-        />
-        
-        {/* Floating particles */}
-        <div className="absolute inset-0 overflow-hidden">
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-gray-400/30 rounded-full animate-float"
-              style={{
-                left: `${(i * 7) % 100}%`,
-                top: `${(i * 13) % 100}%`,
-                animationDelay: `${i * 0.2}s`,
-                animationDuration: `${3 + (i % 3)}s`
-              }}
-            />
-          ))}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-gray-100 via-gray-50 to-gray-200" />
+          <div 
+            className="absolute inset-0 opacity-[0.03] animate-gridMove"
+            style={{
+              backgroundImage: `linear-gradient(to right, #000 1px, transparent 1px), linear-gradient(to bottom, #000 1px, transparent 1px)`,
+              backgroundSize: '50px 50px'
+            }}
+          />
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-6xl mx-auto">
-            {/* Header with enhanced animation */}
+          <section className="min-h-screen flex items-center justify-center pt-20">
+            <div className="max-w-6xl mx-auto text-center">
+              <div className="mb-12">
+                <h1 className="text-7xl md:text-8xl lg:text-9xl font-black text-gray-900 leading-[0.9] tracking-tighter mb-8">
+                  Design that<br />
+                  <span className="relative">
+                    <span className="absolute -inset-6 bg-gradient-to-r from-gray-200/30 to-transparent -z-10 rounded-3xl blur-xl" />
+                    speaks.
+                  </span>
+                </h1>
+                <h2 className="text-6xl md:text-7xl lg:text-8xl font-bold text-gray-700 leading-[0.9] tracking-tighter mb-12">
+                  Delivery that<br />
+                  converts.
+                </h2>
+              </div>
+
+              <div className="max-w-2xl mx-auto text-center mb-16">
+                <p className="text-gray-600 text-xl md:text-2xl leading-relaxed">
+                  I craft focused digital experiences that captivate audiences and drive growth. 
+                  Combining bold design with smart strategy, I elevate your brand to win and convert—seamlessly.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-6 justify-center mb-20">
+                <button 
+                  onClick={scrollToTop}
+                  className="group relative px-10 py-5 bg-gray-900 text-white font-bold rounded-full hover:scale-105 transition-all duration-300 overflow-hidden"
+                >
+                  <span className="relative z-10 flex items-center gap-3">
+                    Back to Top
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-800 to-gray-900 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </button>
+                <button 
+                  onClick={scrollToContact}
+                  className="group relative px-10 py-5 bg-transparent text-gray-900 font-bold rounded-full border-2 border-gray-300 hover:border-gray-900 hover:scale-105 transition-all duration-300 overflow-hidden"
+                >
+                  <span className="relative z-10 flex items-center gap-3">
+                    Contact Me
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                  </span>
+                  <div className="absolute inset-0 bg-gray-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </button>
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center gap-24">
+                  <div className="px-8 bg-gradient-to-b from-gray-50 to-gray-100">
+                    <div className="text-5xl md:text-6xl font-bold text-gray-900">50.5K</div>
+                    <div className="text-gray-600 text-sm mt-2 uppercase tracking-wider">Projects</div>
+                  </div>
+                  <div className="px-8 bg-gradient-to-b from-gray-50 to-gray-100">
+                    <div className="text-5xl md:text-6xl font-bold text-gray-900">85K</div>
+                    <div className="text-gray-600 text-sm mt-2 uppercase tracking-wider">Clients</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div className="py-32">
             <div className="mb-20 text-center">
-              <h2 
-                className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 transition-all duration-1000"
-                style={{
-                  opacity: isAboutVisible ? 1 : 0,
-                  transform: `translateY(${isAboutVisible ? '0' : '30px'}) scale(${isAboutVisible ? 1 : 0.9})`
-                }}
-              >
-                About Me
+              <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+                Project Portfolio
               </h2>
-              <div className="w-24 h-1 bg-gradient-to-r from-gray-300 via-gray-600 to-gray-300 mx-auto mb-6 rounded-full" />
-              <p 
-                className="text-gray-700 text-lg max-w-2xl mx-auto transition-all duration-1000 delay-300"
-                style={{
-                  opacity: isAboutVisible ? 1 : 0,
-                  transform: `translateY(${isAboutVisible ? '0' : '20px'})`
-                }}
-              >
-                Bridging technology and human-centered design through innovative solutions
+              <div className="w-32 h-1 bg-gradient-to-r from-gray-300 via-gray-600 to-gray-300 mx-auto mb-6 rounded-full" />
+              <p className="text-gray-600 text-xl max-w-2xl mx-auto">
+                Interactive showcase of my latest work
               </p>
             </div>
 
-            {/* Three Column Grid with Enhanced Animations */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
-              {services.map((service, index) => (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20">
+              {projectServices.map((service, index) => (
                 <div
-                  key={service.id}
-                  className="group relative bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-200/50 hover:border-gray-300 overflow-hidden"
-                  onMouseEnter={() => setActiveCard(service.id)}
-                  onMouseLeave={() => setActiveCard(null)}
+                  key={index}
+                  className="group p-6 rounded-2xl bg-white/90 backdrop-blur-sm border border-gray-300 hover:border-gray-900 hover:shadow-xl transition-all duration-500 cursor-pointer"
                   style={{
-                    opacity: isAboutVisible ? 1 : 0,
-                    transform: `translateY(${isAboutVisible ? '0' : '50px'})`,
-                    transitionDelay: `${200 + index * 200}ms`
+                    opacity: isProjectsVisible ? 1 : 0,
+                    transform: `translateY(${isProjectsVisible ? '0' : '30px'})`,
+                    transitionDelay: `${index * 100}ms`
                   }}
+                  onMouseEnter={() => setActiveProject(index)}
+                  onMouseLeave={() => setActiveProject(null)}
                 >
-                  {/* Animated background */}
-                  <div 
-                    className={`absolute inset-0 bg-gradient-to-br ${service.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}
-                  />
-                  
-                  {/* Hover effect line */}
-                  <div 
-                    className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-gray-300 via-gray-600 to-gray-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"
-                  />
-                  
-                  <div className="flex items-center gap-3 mb-6 relative z-10">
-                    <div className="w-2 h-8 bg-gradient-to-b from-gray-700 to-gray-900 rounded-full" />
-                    <div className="flex items-center gap-3">
-                      <service.icon className="w-6 h-6 text-gray-700 group-hover:scale-110 transition-transform" />
-                      <h3 className="text-2xl font-bold text-gray-900">{service.title}</h3>
-                    </div>
-                  </div>
-                  
-                  <h4 className="text-xl font-semibold text-gray-700 mb-6 relative z-10">
-                    {service.subtitle}
-                  </h4>
-                  
-                  <ul className="space-y-3 mb-8 relative z-10">
-                    {service.items.map((item, itemIndex) => (
-                      <li 
-                        key={itemIndex}
-                        className="flex items-center text-gray-600 group/item transition-all duration-300 hover:text-gray-900"
-                        style={{
-                          opacity: activeCard === service.id ? 1 : 0.8,
-                          transform: `translateX(${activeCard === service.id ? '5px' : '0'})`
-                        }}
-                      >
-                        <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-3 group-hover/item:scale-125 transition-transform" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                  
-                  <button className="flex items-center gap-2 text-gray-800 font-medium group-hover:gap-3 transition-all relative z-10 hover:text-gray-900">
-                    Learn More
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </button>
+                  <div className={`w-12 h-1 ${service.color} rounded-full mb-4 group-hover:w-16 transition-all duration-300`} />
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{service.title}</h3>
+                  <p className="text-gray-600 text-sm">{service.projects}</p>
                 </div>
               ))}
             </div>
 
-            {/* Skills & Experience Section with Enhanced Visuals */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              {/* Left Column - Experience */}
-              <div
-                style={{
-                  opacity: isAboutVisible ? 1 : 0,
-                  transition: 'opacity 1s ease-out 800ms'
-                }}
-              >
-                <h3 className="text-2xl font-bold text-gray-900 mb-8 flex items-center gap-3">
-                  <Sparkles className="w-6 h-6 text-gray-600" />
-                  Experience & Expertise
-                </h3>
-                <div className="space-y-6">
-                  {[
-                    { title: "Full Stack Development", years: "5+ Years", color: "border-l-gray-800", desc: "Building scalable web applications with modern frameworks and cloud technologies." },
-                    { title: "UI/UX Design", years: "3+ Years", color: "border-l-gray-700", desc: "Creating intuitive user interfaces with a focus on accessibility and user experience." },
-                    { title: "Technical Consulting", years: "2+ Years", color: "border-l-gray-600", desc: "Advising businesses on technology strategy and digital transformation." }
-                  ].map((exp, index) => (
+            <div className="space-y-20">
+              <div className="space-y-16">
+                {projects.slice(0, 3).map((project, index) => (
+                  <div
+                    key={project.id}
+                    className="group cursor-pointer"
+                    style={{
+                      opacity: isProjectsVisible ? 1 : 0,
+                      transform: isProjectsVisible ? 'translateY(0)' : 'translateY(40px)',
+                      transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${index * 150}ms`
+                    }}
+                  >
+                    <div className="grid lg:grid-cols-12 gap-8 items-center">
+                      <div className="lg:col-span-7 relative aspect-[16/9] rounded-2xl overflow-hidden">
+                        <div className={`absolute inset-0 bg-gradient-to-br ${
+                          index === 0 ? 'from-blue-500/20 to-purple-500/20' :
+                          index === 1 ? 'from-emerald-500/20 to-cyan-500/20' :
+                          'from-rose-500/20 to-orange-500/20'
+                        } transition-transform duration-700 group-hover:scale-105`} />
+                        
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="text-center space-y-4">
+                            <div className="inline-block px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full text-sm font-medium">
+                              {project.category}
+                            </div>
+                            <h3 className="text-3xl font-bold text-gray-900">{project.title}</h3>
+                          </div>
+                        </div>
+
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
+                          <div className="text-white text-center space-y-4">
+                            <div className="flex justify-center gap-2">
+                              {project.tech.map((t) => (
+                                <span key={t} className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm">
+                                  {t}
+                                </span>
+                              ))}
+                            </div>
+                            <button className="inline-flex items-center gap-2 px-6 py-3 bg-white text-gray-900 rounded-full font-medium hover:gap-4 transition-all">
+                              View Project
+                              <ArrowRight className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="lg:col-span-5 space-y-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-1 h-8 bg-gradient-to-b from-gray-700 to-gray-900 rounded-full"></div>
+                          <span className="text-sm text-gray-500 uppercase tracking-wider">
+                            Featured Project
+                          </span>
+                        </div>
+                        <h3 className="text-2xl font-bold text-gray-900">{project.title}</h3>
+                        <p className="text-gray-600">
+                          {project.description}
+                        </p>
+                        <div className="flex gap-4 pt-4">
+                          {project.tech.map((t) => (
+                            <span key={t} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                        <p className="text-lg font-bold text-gray-900 pt-4">{project.stats}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-8">
+                <div className="text-center">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">More Work</h3>
+                  <p className="text-gray-500">Additional projects worth exploring</p>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-6">
+                  {otherProjects.map((project, index) => (
                     <div
-                      key={index}
-                      className="group bg-white/90 backdrop-blur-sm p-6 rounded-xl shadow-md border-l-4 border-gray-300 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                      key={project.id}
+                      className="group aspect-[4/3] rounded-xl overflow-hidden cursor-pointer relative"
                       style={{
-                        animationDelay: `${index * 200}ms`
+                        opacity: isProjectsVisible ? 1 : 0,
+                        transform: isProjectsVisible ? 'translateY(0)' : 'translateY(30px)',
+                        transition: `all 0.5s cubic-bezier(0.4, 0, 0.2, 1) ${450 + index * 100}ms`
                       }}
                     >
-                      <div className="flex justify-between items-start mb-3">
-                        <h4 className="font-bold text-gray-900 group-hover:text-gray-800 transition-colors">
-                          {exp.title}
-                        </h4>
-                        <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full group-hover:bg-gray-200 transition-colors">
-                          {exp.years}
-                        </span>
+                      <div className={`absolute inset-0 bg-gradient-to-br ${
+                        index === 0 ? 'from-blue-400/10 to-cyan-400/10' :
+                        index === 1 ? 'from-purple-400/10 to-pink-400/10' :
+                        'from-emerald-400/10 to-teal-400/10'
+                      } group-hover:scale-105 transition-transform duration-700`} />
+                      
+                      <div className="absolute inset-0 p-6 flex flex-col justify-between">
+                        <div className="flex justify-between items-start">
+                          <span className="px-3 py-1 bg-white/80 backdrop-blur-sm rounded-full text-sm font-medium">
+                            {project.category}
+                          </span>
+                          <ArrowRight className="w-5 h-5 text-gray-700 opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all" />
+                        </div>
+                        <h4 className="text-xl font-bold text-gray-900">{project.title}</h4>
                       </div>
-                      <p className="text-gray-600 group-hover:text-gray-700 transition-colors">
-                        {exp.desc}
-                      </p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Right Column - Technical Skills with Enhanced Animations */}
-              <div
+              <div 
+                className="text-center pt-8"
                 style={{
-                  opacity: isAboutVisible ? 1 : 0,
-                  transition: 'opacity 1s ease-out 1000ms'
+                  opacity: isProjectsVisible ? 1 : 0,
+                  transform: isProjectsVisible ? 'translateY(0)' : 'translateY(20px)',
+                  transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1) 700ms'
                 }}
               >
-                <h3 className="text-2xl font-bold text-gray-900 mb-8 flex items-center gap-3">
-                  <Zap className="w-6 h-6 text-gray-600" />
-                  Technical Proficiency
-                </h3>
-                <div className="space-y-8">
-                  {skills.map((skill, index) => (
-                    <div key={index} className="group">
-                      <div className="flex justify-between items-center mb-3">
-                        <div className="flex items-center gap-3">
-                          <skill.icon className="w-5 h-5 text-gray-600 group-hover:scale-110 transition-transform" />
-                          <span className="font-medium text-gray-700 group-hover:text-gray-900 transition-colors">
-                            {skill.name}
-                          </span>
-                        </div>
-                        <span 
-                          className="font-bold text-gray-900 transition-all duration-1000"
-                          style={{
-                            fontSize: isAboutVisible ? '1rem' : '0.875rem',
-                            opacity: isAboutVisible ? 1 : 0
-                          }}
-                        >
-                          {skill.percentage}%
-                        </span>
-                      </div>
-                      <div className="relative">
-                        <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                          <div 
-                            className="h-full rounded-full bg-gradient-to-r from-gray-600 to-gray-800 transition-all duration-1500 ease-out"
-                            style={{
-                              width: isAboutVisible ? `${skill.percentage}%` : '0%',
-                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                            }}
-                          />
-                        </div>
-                        {/* Animated dot on progress bar */}
-                        <div 
-                          className="absolute top-1/2 w-3 h-3 bg-gray-900 rounded-full -translate-y-1/2 transition-all duration-1000 ease-out"
-                          style={{
-                            left: isAboutVisible ? `${skill.percentage}%` : '0%',
-                            transform: `translate(${isAboutVisible ? '-50%' : '0'}, -50%)`,
-                            boxShadow: '0 0 10px rgba(0,0,0,0.2)'
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <button className="inline-flex items-center gap-3 px-8 py-4 bg-gray-900 text-white rounded-full font-medium hover:gap-4 hover:shadow-xl transition-all">
+                  View All Projects
+                  <ArrowRight className="w-5 h-5" />
+                </button>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Projects Section */}
-      <div 
-        ref={projectsRef} 
-        className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-20 relative"
-      >
-        {/* Project section content remains the same with monochrome updates */}
-        {/* ... */}
-      </div>
+          <div id="contact" className="mt-32 text-center">
+            <div className="max-w-2xl mx-auto space-y-8">
+              <h2 className="text-5xl font-bold text-gray-900">
+                Have a project in mind?
+              </h2>
+              <p className="text-gray-600 text-xl">
+                Let's collaborate to create something extraordinary that drives results.
+              </p>
+              <button 
+                onClick={scrollToContact}
+                className="inline-flex items-center gap-3 px-12 py-6 bg-gray-900 text-white text-lg font-bold rounded-full hover:bg-gray-800 transition-all duration-300 hover:scale-105 hover:shadow-2xl group"
+              >
+                Start a Project
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="fixed bottom-8 right-8 z-50">
+          <div className="flex items-center gap-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full border border-gray-300 shadow-lg">
+            <div className="text-sm text-gray-600 font-medium">
+              {Math.round(scrollProgress * 100)}%
+            </div>
+            <div className="w-24 h-1 bg-gray-300 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-gray-700 to-gray-900 transition-all duration-300"
+                style={{ width: `${scrollProgress * 100}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer className="bg-gradient-to-b from-gray-900 to-gray-950 text-white py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+              <div>
+                <h4 className="text-xl font-bold mb-6">Dionisius Bennett</h4>
+                <p className="text-gray-400">
+                  Creating digital experiences that drive growth and innovation.
+                </p>
+              </div>
+              
+              <div>
+                <h5 className="font-bold mb-6">Services</h5>
+                <ul className="space-y-3 text-gray-400">
+                  <li>Web Development</li>
+                  <li>UI/UX Design</li>
+                  <li>Mobile Apps</li>
+                  <li>Backend Systems</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h5 className="font-bold mb-6">Connect</h5>
+                <div className="flex gap-4">
+                  <a 
+                    href="https://www.linkedin.com/in/dionisius-bennett-andrianto-5a2515315/" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    <Linkedin className="w-5 h-5" />
+                  </a>
+                  <a 
+                    href="https://instagram.com/dionisiusben" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    <Instagram className="w-5 h-5" />
+                  </a>
+                </div>
+              </div>
+              
+              <div>
+                <h5 className="font-bold mb-6">Contact</h5>
+                <p className="text-gray-400">
+                  Bogor, Indonesia<br />
+                  Available for projects worldwide
+                </p>
+              </div>
+            </div>
+            
+            <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400 text-sm">
+              © {new Date().getFullYear()} Dionisius Bennett Andrianto. All rights reserved.
+            </div>
+          </div>
+        </div>
+      </footer>
 
       <style jsx global>{`
+        @keyframes gridMove {
+          0% {
+            transform: translate(0, 0);
+          }
+          100% {
+            transform: translate(-50px, -50px);
+          }
+        }
+
         @keyframes fadeIn {
           from {
             opacity: 0;
@@ -664,6 +809,10 @@ export default function Home() {
           }
         }
 
+        .animate-gridMove {
+          animation: gridMove 20s linear infinite;
+        }
+
         .animate-fadeIn {
           animation: fadeIn 1s ease-out forwards;
         }
@@ -688,32 +837,10 @@ export default function Home() {
           animation: shimmer 3s ease-in-out infinite;
         }
 
-        .animation-delay-200 {
-          animation-delay: 200ms;
-        }
-
-        .animation-delay-300 {
-          animation-delay: 300ms;
-        }
-
-        .animation-delay-500 {
-          animation-delay: 500ms;
-        }
-
-        .animation-delay-700 {
-          animation-delay: 700ms;
-        }
-
-        .animation-delay-1000 {
-          animation-delay: 1000ms;
-        }
-
-        /* Smooth scrolling */
         html {
           scroll-behavior: smooth;
         }
 
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
           width: 8px;
         }
@@ -731,7 +858,6 @@ export default function Home() {
           background: linear-gradient(to bottom, #666, #444);
         }
 
-        /* Selection color */
         ::selection {
           background-color: rgba(0, 0, 0, 0.1);
           color: #111;
